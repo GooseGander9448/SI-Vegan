@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U HERB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #e8e8e8;
+  --card: #f7f6f4;
+  --black: #0d0d0d;
+  --muted: #9a9a9a;
+  --text-secondary: #444;
+  --border: 1px solid rgba(0,0,0,0.07);
+  --gap: 8px;
+  --sidebar-w: 278px;
+  --radius: 12px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--black);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+.page {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  gap: var(--gap);
+  padding: var(--gap);
+  height: 100vh;
+  min-width: 0;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  height: 100%;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: var(--border);
+}
+
+.card-name {
+  padding: 28px 28px 32px;
+  font-size: clamp(20px, 3vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--black);
+}
+
+.card-bio { padding: 22px 24px; }
+
+.bio-text {
+  font-size: clamp(10px, 1.1vw, 13.5px);
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+  font-weight: 400;
+}
+
+.btn-talk {
+  display: inline-block;
+  font-size: clamp(10px, 1vw, 13px);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  border: 1px solid #c8c8c8;
+  padding: 7px 20px;
+  border-radius: 100px;
+  color: #555;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-talk:hover { background: var(--black); color: #fff; border-color: var(--black); text-decoration: none; }
+
+.card-clock {
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.clock-time {
+  font-size: clamp(16px, 2.2vw, 30px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--black);
+  line-height: 1;
+}
+
+.clock-loc {
+  font-size: clamp(12px, 1.4vw, 18px);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: var(--muted);
+  line-height: 1;
+}
+
+/* nav card */
+.card-nav {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-link {
+  display: block;
+  font-size: clamp(11px, 1.1vw, 14px);
+  font-weight: 400;
+  color: var(--text-secondary);
+  padding: 7px 10px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+}
+.nav-link:hover { background: rgba(0,0,0,0.05); color: var(--black); text-decoration: none; }
+.nav-link.active { font-weight: 500; color: var(--black); background: rgba(0,0,0,0.04); }
+
+/* image grid */
+.image-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--gap);
+  align-items: start;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  min-width: 0;
+}
+.image-cols::-webkit-scrollbar { display: none; }
+
+.image-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.img-item {
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #c8c8c8;
+  line-height: 0;
+  width: 100%;
+}
+.img-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.img-item:hover img { transform: scale(1.03); }
+
+.img-item.tall  { aspect-ratio: 3 / 4; }
+.img-item.sq    { aspect-ratio: 1 / 1; }
+.img-item.wide  { aspect-ratio: 4 / 3; }
+
+@media (max-width: 900px) { :root { --sidebar-w: 260px; } }
+@media (max-width: 600px) { :root { --sidebar-w: 180px; } }
+
+/* ── FLIP CARD ── */
+.img-item {
+  position: relative;
+  cursor: pointer;
+}
+
+.img-item .flip-back {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: #0d0d0d;
+  border-radius: var(--radius);
+  padding: 16px;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  overflow: hidden;
+}
+
+.img-item img { transition: opacity 0.2s; }
+.img-item.flipped img { opacity: 0; pointer-events: none; }
+.img-item.flipped .flip-back { display: flex !important; }
+
+.flip-top {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.flip-dish {
+  font-size: clamp(13px, 1.4vw, 18px);
+  font-weight: 500;
+  line-height: 1.2;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.flip-desc {
+  font-size: clamp(9px, 0.95vw, 12px);
+  color: rgba(255,255,255,0.65);
+  line-height: 1.55;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.flip-footer {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.flip-restaurant {
+  font-size: clamp(11px, 1.1vw, 14px);
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.flip-address {
+  font-size: clamp(10px, 1vw, 12px);
+  color: rgba(255,255,255,0.85);
+  margin-top: 4px;
+  line-height: 1.3;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <aside class="sidebar">
+
+    <div class="card card-name">Staten Island<br>Plant Based</div>
+
+    <div class="card card-nav">
+      <a class="nav-link active" href="index.html">Dishes</a>
+      <a class="nav-link" href="#">Restaurants</a>
+      <a class="nav-link" href="about.html">About Us</a>
+      <a class="nav-link" href="plans.html">Plans for the Site</a>
+    </div>
+
+    <div class="card card-bio">
+      <p class="bio-text">
+        This is a project to make a list of fully plant-based dishes on Staten Island. No "mostly vegan" dishes, these are verified plant-based options, all on one site. I'll start with what I know and confirm directly with restaurants from there. Email me to add, remove, or suggest something.
+      </p>
+      <a class="btn-talk" href="mailto:StatenIslandPlantBased@proton.me">Email me</a>
+    </div>
+
+    <div class="card card-clock">
+      <span class="clock-loc">Staten Island, NY</span>
+      <span class="clock-time" id="clock">--:--:-- --</span>
+      <span style="white-space: nowrap;"><span style="font-size: 12px; color: var(--muted); font-weight: 700;">Last updated on </span><span id="last-updated" style="font-size: 12px; color: rgba(0,0,0,0.6); font-weight: 500;"></span></span>
+    </div>
+
+
+  </aside>
+
+  <div class="image-cols">
+    <div class="image-col">
+      <div class="img-item tall"><img src="food%20photos/image1.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Green Bowl</div>
+          <div class="flip-desc">Roasted chickpeas, kale, quinoa, tahini dressing, lemon zest.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">The Green Fork</div>
+          <div class="flip-address">123 Richmond Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image2.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Avocado Toast</div>
+          <div class="flip-desc">Smashed avocado, cherry tomatoes, everything bagel seasoning on sourdough.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Morning Roots Cafe</div>
+          <div class="flip-address">456 Hylan Blvd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item wide"><img src="food%20photos/image3.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Lentil Soup</div>
+          <div class="flip-desc">Red lentils, cumin, coriander, lemon, fresh parsley.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Spice Garden</div>
+          <div class="flip-address">789 Victory Blvd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item tall"><img src="food%20photos/image4.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Cauliflower Tacos</div>
+          <div class="flip-desc">Roasted cauliflower, black beans, mango salsa, chipotle cream.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Taco Verde</div>
+          <div class="flip-address">321 Forest Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image5.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Buddha Bowl</div>
+          <div class="flip-desc">Brown rice, edamame, roasted sweet potato, pickled ginger, sesame.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Zen Kitchen</div>
+          <div class="flip-address">654 Bay St, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item wide"><img src="food%20photos/image6.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Mushroom Burger</div>
+          <div class="flip-desc">Portobello cap, arugula, caramelized onion, vegan aioli, brioche bun.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Plant Burger Co</div>
+          <div class="flip-address">987 Richmond Terrace, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item tall"><img src="food%20photos/image7.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Acai Bowl</div>
+          <div class="flip-desc">Acai base, banana, granola, fresh berries, coconut flakes, agave.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Island Bowls</div>
+          <div class="flip-address">147 New Dorp Lane, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image8.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Pad Thai</div>
+          <div class="flip-desc">Rice noodles, tofu, bean sprouts, scallions, crushed peanuts, lime.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Thai Orchid</div>
+          <div class="flip-address">258 Jewett Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item wide"><img src="food%20photos/image1.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Falafel Wrap</div>
+          <div class="flip-desc">House falafel, hummus, cucumber, tomato, pickled red onion, tahini.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Pita Palace</div>
+          <div class="flip-address">369 Manor Rd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="image-col">
+      <div class="img-item tall"><img src="food%20photos/image2.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Jackfruit Sandwich</div>
+          <div class="flip-desc">Pulled jackfruit, smoky BBQ, slaw, pickles on a toasted roll.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">The Green Fork</div>
+          <div class="flip-address">123 Richmond Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image3.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Smoothie Bowl</div>
+          <div class="flip-desc">Mango, pineapple, coconut milk base, topped with chia and granola.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Island Bowls</div>
+          <div class="flip-address">147 New Dorp Lane, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item wide"><img src="food%20photos/image4.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Black Bean Tacos</div>
+          <div class="flip-desc">Seasoned black beans, corn, avocado, pico de gallo, lime crema.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Taco Verde</div>
+          <div class="flip-address">321 Forest Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image5.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Curry Bowl</div>
+          <div class="flip-desc">Yellow lentil dal, basmati rice, mango chutney, crispy onions.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Spice Garden</div>
+          <div class="flip-address">789 Victory Blvd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item tall"><img src="food%20photos/image6.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Grain Bowl</div>
+          <div class="flip-desc">Farro, roasted beets, candied walnuts, arugula, balsamic glaze.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Morning Roots Cafe</div>
+          <div class="flip-address">456 Hylan Blvd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image7.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Tofu Scramble</div>
+          <div class="flip-desc">Firm tofu, turmeric, peppers, spinach, nutritional yeast, toast.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Zen Kitchen</div>
+          <div class="flip-address">654 Bay St, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item wide"><img src="food%20photos/image8.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Spring Rolls</div>
+          <div class="flip-desc">Rice paper, vermicelli, avocado, carrot, cucumber, peanut dipping sauce.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Thai Orchid</div>
+          <div class="flip-address">258 Jewett Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image1.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Veggie Burger</div>
+          <div class="flip-desc">Black bean patty, lettuce, tomato, onion, pickles, mustard, brioche.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Plant Burger Co</div>
+          <div class="flip-address">987 Richmond Terrace, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item tall"><img src="food%20photos/image2.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Hummus Plate</div>
+          <div class="flip-desc">House hummus, warm pita, olives, roasted red pepper, za'atar.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Pita Palace</div>
+          <div class="flip-address">369 Manor Rd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="image-col">
+      <div class="img-item sq"><img src="food%20photos/image3.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Overnight Oats</div>
+          <div class="flip-desc">Rolled oats, almond milk, chia seeds, maple syrup, fresh fruit.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Morning Roots Cafe</div>
+          <div class="flip-address">456 Hylan Blvd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item tall"><img src="food%20photos/image4.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Miso Ramen</div>
+          <div class="flip-desc">Miso broth, ramen noodles, bok choy, corn, nori, soft tofu.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Zen Kitchen</div>
+          <div class="flip-address">654 Bay St, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item wide"><img src="food%20photos/image5.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Stuffed Peppers</div>
+          <div class="flip-desc">Bell peppers stuffed with quinoa, black beans, corn, tomato sauce.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">The Green Fork</div>
+          <div class="flip-address">123 Richmond Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image6.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Veggie Wrap</div>
+          <div class="flip-desc">Grilled zucchini, hummus, roasted red peppers, spinach, lavash.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Spice Garden</div>
+          <div class="flip-address">789 Victory Blvd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item wide"><img src="food%20photos/image7.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Poke Bowl</div>
+          <div class="flip-desc">Watermelon tuna, edamame, cucumber, pickled ginger, sriracha mayo.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Island Bowls</div>
+          <div class="flip-address">147 New Dorp Lane, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image8.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Shakshuka</div>
+          <div class="flip-desc">Tomatoes, peppers, onion, cumin, paprika, served with sourdough.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Morning Roots Cafe</div>
+          <div class="flip-address">456 Hylan Blvd, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item tall"><img src="food%20photos/image1.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Noodle Bowl</div>
+          <div class="flip-desc">Soba noodles, edamame, shredded cabbage, sesame ginger dressing.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">Thai Orchid</div>
+          <div class="flip-address">258 Jewett Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+      <div class="img-item sq"><img src="food%20photos/image2.jpg" alt="" loading="lazy">
+      <div class="flip-back">
+        <div class="flip-top">
+          <div class="flip-dish">Roasted Veggie Plate</div>
+          <div class="flip-desc">Seasonal roasted vegetables, herb oil, lemon, tahini drizzle.</div>
+        </div>
+        <div class="flip-footer">
+          <div class="flip-restaurant">The Green Fork</div>
+          <div class="flip-address">123 Richmond Ave, Staten Island</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function tick() {
+    const t = new Date().toLocaleTimeString('en-US', {
+      timeZone: 'America/New_York',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
+    document.getElementById('clock').textContent = t;
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
+
+  document.querySelectorAll('.img-item').forEach(el => {
+    el.addEventListener('click', () => {
+      el.classList.toggle('flipped');
+    });
+  });
+</script>
+</body>
+</html>
